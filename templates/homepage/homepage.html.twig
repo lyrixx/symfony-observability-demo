@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Observability Demo Application{% endblock %}
+
+{% block body %}
+    <h1>{{ block('title') }}</h1>
+
+    {% for flash in app.flashes('success') %}
+
+        <strong>
+            {{ flash }}
+        </strong>
+
+    {% endfor %}
+
+    <p>
+        This application demonstrates how to configure propertly monolog.
+
+        Monolog will outputs all logs to
+        <a href="https://vector.dev/" title="An application that collects an re-disptache logs">vector</a>.
+        Vector will then send logs to different databases:
+
+        <ul>
+            <li>clickhouse</li>
+            <li>elasticsearch</li>
+            <li>loki</li>
+        </ul>
+
+        This page generate one log record, but you can go to
+        the <a href="{{ path('logs') }}">logs page</a> to generate more logs,
+        or the <a href="{{ path('exception') }}">exception page</a> to generate one with an exception.
+    </p>
+
+    <p>
+        The following applications let you explore the collected metrics:
+        <ul>
+            <li><a href="https://kibana.{{ app.request.host }}">Kibana</a>: application to explore Elasticsearch logs</li>
+            <li><a href="https://grafana.{{ app.request.host }}">Grafana</a>: application to explore Loki (or Clickhouse) logs</li>
+            <li><a href="https://redash.{{ app.request.host }}">Redash</a>: application to explore Clickhouse (or Elasticsearch) logs</li>
+        </ul>
+    </p>
+{% endblock %}

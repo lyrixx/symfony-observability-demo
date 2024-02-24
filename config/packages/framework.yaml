@@ -1,0 +1,32 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+    #csrf_protection: true
+
+    # Note that the session will be started ONLY if you read or write from it.
+    session: true
+
+    #esi: true
+    #fragments: true
+    php_errors:
+        log:
+            !php/const \E_DEPRECATED: !php/const Psr\Log\LogLevel::WARNING
+            !php/const \E_USER_DEPRECATED: !php/const Psr\Log\LogLevel::WARNING
+            !php/const \E_NOTICE: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_USER_NOTICE: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_STRICT: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_WARNING: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_USER_WARNING: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_COMPILE_WARNING: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_CORE_WARNING: !php/const Psr\Log\LogLevel::ERROR
+            !php/const \E_USER_ERROR: !php/const Psr\Log\LogLevel::CRITICAL
+            !php/const \E_RECOVERABLE_ERROR: !php/const Psr\Log\LogLevel::CRITICAL
+            !php/const \E_COMPILE_ERROR: !php/const Psr\Log\LogLevel::CRITICAL
+            !php/const \E_PARSE: !php/const Psr\Log\LogLevel::CRITICAL
+            !php/const \E_ERROR: !php/const Psr\Log\LogLevel::CRITICAL
+            !php/const \E_CORE_ERROR: !php/const Psr\Log\LogLevel::CRITICAL
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

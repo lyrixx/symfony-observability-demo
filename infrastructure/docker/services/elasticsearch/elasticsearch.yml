@@ -1,0 +1,17 @@
+# Node configuration
+node.name: ${HOSTNAME}
+node.data: true
+node.master: true
+
+# Cluster configuration
+cluster.name: observability
+
+# Needed to access from other container + kibana
+http.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# # Uncomment to use clustering + duplicate "elasticsearch" configuration in docker-compose.yml
+# network.host: 0.0.0.0 # Really needed for clustering
+# discovery.zen.minimum_master_nodes: 2
+# discovery.zen.ping.unicast.hosts: [elasticsearch, elasticsearch2]

@@ -1,0 +1,22 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../../../src/**/Exception/*'
+            - '../../../src/**/Model/*'
+            - '../../../src/**/Messenger/Message/*'
+
+    Symfony\Bridge\Monolog\Processor\WebProcessor: ~
+    Symfony\Bridge\Monolog\Processor\ConsoleCommandProcessor: ~
+    # security is not enabled in this application
+    # Symfony\Bridge\Monolog\Processor\TokenProcessor: ~
+    Monolog\Processor\PsrLogMessageProcessor: ~
