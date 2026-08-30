@@ -3,40 +3,64 @@
 {% block title %}Observability Demo Application{% endblock %}
 
 {% block body %}
-    <h1>{{ block('title') }}</h1>
+    <div class="bg-body-tertiary border-bottom">
+        <div class="container py-5 text-center">
+            <h1 class="display-5 fw-bold">{{ block('title') }}</h1>
+            <p class="col-lg-8 mx-auto lead">
+                This application demonstrates how to configure Monolog with Symfony.
+                Every log record is sent to
+                <a href="https://vector.dev/" title="An application that collects and re-dispatches logs">Vector</a>,
+                which fans it out to ClickHouse, Elasticsearch and Loki.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ path('logs') }}" class="btn btn-primary btn-lg">Generate logs</a>
+                <a href="{{ path('exception') }}" class="btn btn-outline-danger btn-lg">Generate an exception</a>
+            </div>
+        </div>
+    </div>
 
-    {% for flash in app.flashes('success') %}
-
-        <strong>
-            {{ flash }}
-        </strong>
-
-    {% endfor %}
-
-    <p>
-        This application demonstrates how to configure propertly monolog.
-
-        Monolog will outputs all logs to
-        <a href="https://vector.dev/" title="An application that collects an re-disptache logs">vector</a>.
-        Vector will then send logs to different databases:
-
-        <ul>
-            <li>clickhouse</li>
-            <li>elasticsearch</li>
-            <li>loki</li>
-        </ul>
-
-        This page generate one log record, but you can go to
-        the <a href="{{ path('logs') }}">logs page</a> to generate more logs,
-        or the <a href="{{ path('exception') }}">exception page</a> to generate one with an exception.
-    </p>
-
-    <p>
-        The following applications let you explore the collected metrics:
-        <ul>
-            <li><a href="https://kibana.{{ app.request.host }}">Kibana</a>: application to explore Elasticsearch logs</li>
-            <li><a href="https://grafana.{{ app.request.host }}">Grafana</a>: application to explore Loki (or Clickhouse) logs</li>
-            <li><a href="https://redash.{{ app.request.host }}">Redash</a>: application to explore Clickhouse (or Elasticsearch) logs</li>
-        </ul>
-    </p>
+    <div class="container py-5">
+        <h2 class="h4 mb-4">Explore the collected logs</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="card-title h5">Kibana</h3>
+                        <p class="card-text text-body-secondary">Pre-built dashboard over Elasticsearch logs.</p>
+                        <a href="https://kibana.{{ app.request.host }}/app/dashboards#/view/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="card-title h5">Grafana</h3>
+                        <p class="card-text text-body-secondary">Pre-built dashboard over Loki and ClickHouse logs.</p>
+                        <a href="https://grafana.{{ app.request.host }}/d/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="card-title h5">Redash</h3>
+                        <p class="card-text text-body-secondary">
+                            Pre-built dashboard over ClickHouse logs. Login:
+                            <code>admin@observability.test</code> / <code>observability</code>.
+                        </p>
+                        <a href="https://redash.{{ app.request.host }}/dashboard/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="card-title h5">Vector</h3>
+                        <p class="card-text text-body-secondary">Inspect the log collection pipeline itself.</p>
+                        <a href="https://vector.{{ app.request.host }}/playground" class="mt-auto">Open playground &raquo;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

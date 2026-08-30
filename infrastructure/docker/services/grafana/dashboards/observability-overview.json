@@ -1,0 +1,147 @@
+{
+    "uid": "observability-overview",
+    "title": "Observability overview",
+    "editable": true,
+    "schemaVersion": 39,
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "panels": [
+        {
+            "id": 1,
+            "type": "row",
+            "title": "Loki",
+            "collapsed": false,
+            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+            "panels": []
+        },
+        {
+            "id": 2,
+            "type": "timeseries",
+            "title": "Log volume by level",
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 1},
+            "datasource": {"type": "loki", "uid": "loki"},
+            "fieldConfig": {
+                "defaults": {"custom": {"fillOpacity": 20, "stacking": {"mode": "normal"}}},
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "loki", "uid": "loki"},
+                    "expr": "sum by (level) (count_over_time({application=\"app\"}[$__interval]))",
+                    "queryType": "range",
+                    "legendFormat": "{{level}}"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "type": "timeseries",
+            "title": "Log volume by channel",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+            "datasource": {"type": "loki", "uid": "loki"},
+            "fieldConfig": {
+                "defaults": {"custom": {"fillOpacity": 20, "stacking": {"mode": "normal"}}},
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "loki", "uid": "loki"},
+                    "expr": "sum by (channel) (count_over_time({application=\"app\"}[$__interval]))",
+                    "queryType": "range",
+                    "legendFormat": "{{channel}}"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "type": "logs",
+            "title": "Recent logs",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+            "datasource": {"type": "loki", "uid": "loki"},
+            "options": {
+                "showTime": true,
+                "showLabels": true,
+                "sortOrder": "Descending"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "loki", "uid": "loki"},
+                    "expr": "{application=\"app\"}",
+                    "queryType": "range"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "type": "row",
+            "title": "ClickHouse",
+            "collapsed": false,
+            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
+            "panels": []
+        },
+        {
+            "id": 6,
+            "type": "timeseries",
+            "title": "Log volume by level",
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
+            "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+            "fieldConfig": {
+                "defaults": {"custom": {"fillOpacity": 20, "stacking": {"mode": "normal"}}, "displayName": "${__field.labels.level_name}"},
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+                    "rawSql": "SELECT $__timeInterval(datetime) AS time, level_name, count() AS value FROM app.logs WHERE $__timeFilter(datetime) GROUP BY time, level_name ORDER BY time",
+                    "format": 0
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "type": "barchart",
+            "title": "Logs by channel",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
+            "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+            "options": {
+                "orientation": "horizontal",
+                "xField": "channel"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+                    "rawSql": "SELECT channel, count() AS total FROM app.logs WHERE $__timeFilter(datetime) GROUP BY channel ORDER BY total DESC",
+                    "format": 1
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "type": "barchart",
+            "title": "Logs by level",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
+            "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+            "options": {
+                "orientation": "horizontal",
+                "xField": "level_name"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+                    "rawSql": "SELECT level_name, count() AS total FROM app.logs WHERE $__timeFilter(datetime) GROUP BY level_name ORDER BY total DESC",
+                    "format": 1
+                }
+            ]
+        }
+    ]
+}

@@ -17,6 +17,10 @@ transforms:
     type: remap
     source: |
       . = parse_json!(.message)
+      # Use the application's own record time (it may be backdated, e.g. by
+      # the demo's log generator) instead of Vector's ingestion time, so
+      # every sink below indexes/queries logs by when they actually happened.
+      .timestamp = parse_timestamp(.datetime, format: "%+") ?? now()
       .host = get_hostname() ?? "n/a"
       .environment = get_env_var("VECTOR_ENVIRONMENT") ?? "development"
       .application = get_env_var("VECTOR_APPLICATION") ?? "app"
@@ -40,6 +44,10 @@ sinks:
       codec: json
     endpoint: 'http://loki:3100'
     healthcheck: false
+    # Backdated (simulated historical) logs land with an earlier timestamp
+    # than what's already been sent for the same stream. Let Loki decide
+    # instead of Vector silently dropping them as "out of order".
+    out_of_order_action: accept
     labels:
       host: '{{ host }}'
       environment: '{{ environment }}'

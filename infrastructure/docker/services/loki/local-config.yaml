@@ -1,0 +1,43 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  # The demo's log generator backdates logs (e.g. "spread over the last 6
+  # hours") to simulate history instantly, which pushes lines out of order
+  # relative to whatever was already ingested for the same stream, and
+  # further back than Loki accepts by default.
+  unordered_writes: true
+  reject_old_samples: false
+  reject_old_samples_max_age: 168h
+
+ingester:
+  # With unordered_writes, entries older than the open chunk's max_chunk_age
+  # are still rejected ("entry too far behind"). Give it enough headroom for
+  # the widest backdating window the log generator offers (6h).
+  max_chunk_age: 8h
+
+ruler:
+  alertmanager_url: http://localhost:9093

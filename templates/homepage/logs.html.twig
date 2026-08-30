@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Generate logs{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <h1 class="mb-3">{{ block('title') }}</h1>
+        <p class="lead text-body-secondary">
+            Pick a tempo below. Logs are generated with realistic, backdated
+            timestamps spread across the chosen window, so the dashboards
+            immediately show a believable history instead of a single burst.
+        </p>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mt-2">
+            {% for tempo, label in tempos %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body d-flex flex-column">
+                            <h2 class="card-title h5 text-capitalize">{{ label }}</h2>
+                            <a href="{{ path('generate_logs', {tempo: tempo}) }}" class="btn btn-primary mt-auto">
+                                Generate logs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

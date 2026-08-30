@@ -12,6 +12,7 @@ use function docker\docker_compose_exec;
 use function docker\docker_compose_run;
 use function docker\generate_certificates;
 use function docker\up;
+use function provision\provision;
 
 guard_min_version('1.5.0');
 
@@ -40,6 +41,7 @@ function start(): void
     up();
     install();
     migrate();
+    provision();
 
     notify('The stack is now up and running.');
     io()->success('The stack is now up and running.');
@@ -75,5 +77,5 @@ function migrate(): void
     docker_compose_run(['bin/console', 'doctrine:migration:migrate', '-n', '--allow-no-migration']);
     docker_compose_exec(['bin/docker-entrypoint', 'create_db'], service: 'redash');
     docker_compose_exec(['clickhouse-client', '-q', 'CREATE DATABASE IF NOT EXISTS app'], service: 'clickhouse');
-    docker_compose_exec(['clickhouse-client', '-q', 'CREATE TABLE IF NOT EXISTS app.logs (message String) ENGINE = MergeTree() ORDER BY tuple()'], service: 'clickhouse');
+    docker_compose_exec(['clickhouse-client', '-q', 'CREATE TABLE IF NOT EXISTS app.logs (datetime DateTime64(6), level UInt16, level_name LowCardinality(String), channel LowCardinality(String), message String) ENGINE = MergeTree() ORDER BY datetime'], service: 'clickhouse');
 }

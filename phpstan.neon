@@ -2,6 +2,7 @@ parameters:
     level: 6
     paths:
         - src
+        - tests
         - castor.php
         - .castor/
     scanFiles:
@@ -35,3 +36,8 @@ parameters:
             # private-method shadowing, not visible to PHPStan's usage analysis.
             message: '#^Method App\\Kernel::getAllowedEnvs\(\) is unused\.$#'
             path: src/Kernel.php
+        -
+            # Flex-recipe-managed BC guard (symfony/phpunit-bridge), kept as-is so
+            # future recipe updates keep applying cleanly.
+            message: '#^Call to function method_exists\(\) with .*Dotenv.* will always evaluate to true\.$#'
+            path: tests/bootstrap.php

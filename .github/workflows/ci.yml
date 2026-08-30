@@ -1,0 +1,72 @@
+name: Continuous Integration
+
+"on":
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+    schedule:
+        - cron: "0 0 * * MON"
+
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    # Fix for symfony/color detection. We know GitHub Actions can handle it
+    ANSICON: 1
+    CASTOR_CONTEXT: ci
+
+jobs:
+    check-dockerfile:
+        name: Check Dockerfile
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: Check infrastructure/docker/services/php/Dockerfile
+              uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
+              with:
+                  dockerfile: infrastructure/docker/services/php/Dockerfile
+
+    ci:
+        name: Build, migrate and run the QA suite
+        runs-on: ubuntu-latest
+        steps:
+            - name: setup-castor
+              uses: castor-php/setup-castor@827c7ae1be0bb45e42a6082cad943a2afe0ffd40 # v1.0.0
+
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: "Build and start the infrastructure"
+              run: "castor start"
+
+            - name: "Check Security issues"
+              run: "castor qa:security-audit"
+
+            - name: "Check PHP coding standards"
+              run: "castor qa:cs --dry-run"
+
+            - name: "Check Twig coding standards"
+              run: "castor qa:twig-cs --dry-run"
+
+            - name: "Run PHPStan"
+              run: "castor qa:phpstan"
+
+            - name: "Run PHPUnit"
+              run: "castor qa:phpunit"
+
+            - name: "Test the homepage over HTTPS"
+              run: |
+                  set -e
+                  set -o pipefail
+
+                  curl --fail --insecure --silent -H "Host: observability.test" https://127.0.0.1 | grep "Observability Demo Application"
