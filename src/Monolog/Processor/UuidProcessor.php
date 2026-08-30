@@ -12,7 +12,7 @@ final class UuidProcessor implements ProcessorInterface, ResetInterface
     private string $uuid;
 
     public function __construct(
-        private readonly RequestStack $requestStack
+        private readonly RequestStack $requestStack,
     ) {
     }
 

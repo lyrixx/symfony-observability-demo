@@ -72,6 +72,6 @@ class HomepageController extends AbstractController
             8 => LogLevel::EMERGENCY,
         };
 
-        $this->logger->log($level, sprintf('A random string at level %s - %s.', $level, bin2hex(random_bytes(15))));
+        $this->logger->log($level, \sprintf('A random string at level %s - %s.', $level, bin2hex(random_bytes(15))));
     }
 }

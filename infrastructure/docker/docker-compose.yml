@@ -1,43 +1,37 @@
-version: '3.7'
+# Templates to factorize the service definitions
+x-templates:
+    worker_base: &worker_base
+        build:
+            context: services/php
+            target: worker
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            - APP_ENV
+        depends_on:
+            postgres:
+                condition: service_healthy
+        volumes:
+            - "../..:/var/www:cached"
+        profiles:
+            - worker
+
+    redash-service: &redash-service
+        image: redash/redash:8.0.0.b32245
+        depends_on:
+            - redis
+        env_file: ./redash.env
+        profiles:
+            - default
 
 volumes:
+    postgres-data: {}
     clickhouse-data: {}
     elasticsearch-data: {}
     grafana-data: {}
     loki-data: {}
-    postgres-data: {}
     vector-data: {}
 
-x-redash-service: &redash-service
-    image: redash/redash:8.0.0.b32245
-    depends_on:
-        - redis
-    env_file: ./redash.env
-
-
 services:
-    router:
-        build: services/router
-        volumes:
-            - "/var/run/docker.sock:/var/run/docker.sock"
-            - "./services/router/certs:/etc/ssl/certs"
-        network_mode: host
-
-    frontend:
-        build:
-            context: services/php
-            target: frontend
-        depends_on:
-            - postgres
-        volumes:
-            - "../..:/var/www:cached"
-        environment:
-            - "PHP_VERSION=${PHP_VERSION}"
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.${PROJECT_NAME}-frontend.rule=Host(${PROJECT_DOMAINS})"
-            - "traefik.http.routers.${PROJECT_NAME}-frontend.tls=true"
-
     postgres:
         image: postgres:16
         environment:
@@ -47,6 +41,67 @@ services:
             - POSTGRES_DB=redash
         volumes:
             - postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        profiles:
+            - default
+
+    frontend:
+        build:
+            context: services/php
+            target: frontend
+            cache_from:
+              - "type=registry,ref=${REGISTRY:-}/frontend:cache"
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            - APP_ENV
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        profiles:
+            - default
+        labels:
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend.rule=Host(${PROJECT_DOMAINS})"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend.tls=true"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.rule=Host(${PROJECT_DOMAINS})"
+            # Comment the next line to be able to access frontend via HTTP instead of HTTPS
+            - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.middlewares=redirect-to-https@file"
+
+    # worker_messenger:
+    #     <<: *worker_base
+    #     command: php -d memory_limit=1G /var/www/bin/console messenger:consume async --memory-limit=128M
+
+    builder:
+        build:
+            context: services/php
+            target: builder
+            cache_from:
+                - "type=registry,ref=${REGISTRY:-}/builder:cache"
+        init: true
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            - APP_ENV
+            # The following list contains the common environment variables exposed by CI platforms
+            - GITHUB_ACTIONS
+            - CI # Travis CI, CircleCI, Cirrus CI, Gitlab CI, Appveyor, CodeShip, dsari
+            - CONTINUOUS_INTEGRATION # Travis CI, Cirrus CI
+            - BUILD_NUMBER # Jenkins, TeamCity
+            - RUN_ID # TaskCluster, dsari
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        depends_on:
+            - postgres
+        profiles:
+            - builder
 
     vector:
         image: timberio/vector:0.36.0-debian
@@ -54,9 +109,12 @@ services:
             - ./services/vector/vector.yaml:/etc/vector/vector.yaml
             - vector-data:/var/lib/vector
         expose:
-          - "8686"
+            - "8686"
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-vector.rule=Host(`vector.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-vector.tls=true"
 
@@ -73,15 +131,21 @@ services:
             # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/docker.html#docker-compose-file
             - bootstrap.memory_lock=true
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-elasticsearch.rule=Host(`elasticsearch.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-elasticsearch.tls=true"
 
     kibana:
         image: 'docker.elastic.co/kibana/kibana:7.17.18'
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-kibana.rule=Host(`kibana.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-kibana.tls=true"
 
@@ -90,8 +154,11 @@ services:
         volumes:
             - loki-data:/loki
         command: -config.file=/etc/loki/local-config.yaml
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-loki.rule=Host(`loki.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-loki.tls=true"
 
@@ -138,8 +205,11 @@ services:
                     editable: false
                 EOF
                 /run.sh
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-grafana.rule=Host(`grafana.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-grafana.tls=true"
 
@@ -153,8 +223,11 @@ services:
             CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
         volumes:
             - "clickhouse-data:/var/lib/clickhouse"
+        profiles:
+            - default
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-clickhouse.rule=Host(`clickhouse.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-clickhouse.tls=true"
 
@@ -165,6 +238,7 @@ services:
         command: server
         labels:
             - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
             - "traefik.http.routers.${PROJECT_NAME}-redash.rule=Host(`redash.${PROJECT_ROOT_DOMAIN}`)"
             - "traefik.http.routers.${PROJECT_NAME}-redash.tls=true"
     redash-scheduler:
@@ -187,3 +261,5 @@ services:
         command: worker
     redis:
         image: redis:7-alpine
+        profiles:
+            - default
