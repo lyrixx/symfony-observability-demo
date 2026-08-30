@@ -20,6 +20,7 @@ return (new PhpCsFixer\Config())
         'php_unit_internal_class' => false, // From @PhpCsFixer but we don't want it
         'php_unit_test_class_requires_covers' => false, // From @PhpCsFixer but we don't want it
         'phpdoc_add_missing_param_annotation' => false, // From @PhpCsFixer but we don't want it
+        'no_unset_on_property' => false, // From @PhpCsFixer:risky but it breaks the isset()-based lazy-init pattern on typed properties
         'concat_space' => ['spacing' => 'one'],
         'ordered_class_elements' => true, // Symfony(PSR12) override the default value, but we don't want
         'blank_line_before_statement' => true, // Symfony(PSR12) override the default value, but we don't want

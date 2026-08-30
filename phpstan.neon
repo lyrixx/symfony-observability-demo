@@ -28,3 +28,10 @@ parameters:
                 registry?: ?string,
             }
         '''
+
+    ignoreErrors:
+        -
+            # Called by Symfony\Component\DependencyInjection\Kernel\KernelTrait via
+            # private-method shadowing, not visible to PHPStan's usage analysis.
+            message: '#^Method App\\Kernel::getAllowedEnvs\(\) is unused\.$#'
+            path: src/Kernel.php
