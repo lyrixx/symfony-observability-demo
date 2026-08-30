@@ -1,0 +1,29 @@
+version: 2
+updates:
+    - package-ecosystem: 'github-actions'
+      directory: '/'
+      target-branch: 'main'
+      schedule:
+          interval: 'monthly'
+      groups:
+          github-actions:
+              patterns:
+                  - '*'
+      cooldown:
+          default-days: 7
+
+    - package-ecosystem: 'composer'
+      directories:
+          - '/'
+          - '/tools/php-cs-fixer'
+          - '/tools/phpstan'
+          - '/tools/twig-cs-fixer'
+      target-branch: 'main'
+      schedule:
+          interval: 'monthly'
+      groups:
+          composer:
+              patterns:
+                  - '*'
+      cooldown:
+          default-days: 7

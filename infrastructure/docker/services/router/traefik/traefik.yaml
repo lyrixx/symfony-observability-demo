@@ -5,6 +5,7 @@ global:
 providers:
   docker:
     exposedByDefault: false
+    constraints: "Label(`project-name`,`{{ PROJECT_NAME }}`)"
   file:
     filename: /etc/traefik/dynamic_conf.yaml
 
@@ -21,8 +22,8 @@ api:
 
 entryPoints:
   http:
-   address: ":80"
+    address: ":80"
   https:
-   address: ":443"
+    address: ":443"
   traefik: # this one exists by default
-   address: ":8080"
+    address: ":8080"

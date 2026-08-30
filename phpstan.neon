@@ -2,6 +2,7 @@ parameters:
     level: 6
     paths:
         - src
+        - tests
         - castor.php
         - .castor/
     scanFiles:
@@ -10,7 +11,7 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
 
     symfony:
-       container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
 
     typeAliases:
         ContextData: '''
@@ -19,12 +20,24 @@ parameters:
                 root_domain: string,
                 extra_domains: string[],
                 php_version: string,
-                docker_compose_files: string[],
+                docker_compose_files: list<string>,
+                docker_compose_run_environment: list<string>,
                 macos: bool,
                 power_shell: bool,
                 user_id: int,
                 root_dir: string,
-                env: string,
-                composer_cache_dir: string,
+                registry?: ?string,
             }
         '''
+
+    ignoreErrors:
+        -
+            # Called by Symfony\Component\DependencyInjection\Kernel\KernelTrait via
+            # private-method shadowing, not visible to PHPStan's usage analysis.
+            message: '#^Method App\\Kernel::getAllowedEnvs\(\) is unused\.$#'
+            path: src/Kernel.php
+        -
+            # Flex-recipe-managed BC guard (symfony/phpunit-bridge), kept as-is so
+            # future recipe updates keep applying cleanly.
+            message: '#^Call to function method_exists\(\) with .*Dotenv.* will always evaluate to true\.$#'
+            path: tests/bootstrap.php

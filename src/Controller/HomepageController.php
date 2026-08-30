@@ -15,6 +15,18 @@ use Symfony\Component\Routing\Attribute\Route;
 #[WithMonologChannel('homepage')]
 class HomepageController extends AbstractController
 {
+    /**
+     * Tempos offered on the log generator page, with their human label.
+     *
+     * @var array<string, string>
+     */
+    private const TEMPOS = [
+        'now' => 'right now',
+        '30m' => 'the last 30 minutes',
+        '1h' => 'the last hour',
+        '6h' => 'the last 6 hours',
+    ];
+
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly MessageBusInterface $bus,
@@ -38,11 +50,36 @@ class HomepageController extends AbstractController
     #[Route('/logs', name: 'logs')]
     public function logs(): Response
     {
-        for ($i = 0, $l = random_int(1, 100); $i < $l; ++$i) {
-            $this->emitLog();
+        return $this->render('homepage/logs.html.twig', [
+            'tempos' => self::TEMPOS,
+        ]);
+    }
+
+    #[Route('/logs/generate/{tempo}', name: 'generate_logs', requirements: ['tempo' => 'now|30m|1h|6h'])]
+    public function generateLogs(string $tempo): Response
+    {
+        [$seconds, $count] = match ($tempo) {
+            'now' => [0, random_int(1, 100)],
+            '30m' => [1_800, 150],
+            '1h' => [3_600, 250],
+            '6h' => [21_600, 600],
+            default => throw new \UnexpectedValueException("Unknown tempo \"{$tempo}\"."),
+        };
+
+        // Emit oldest-first: Loki (and log stores in general) rejects or
+        // mishandles out-of-order entries within the same stream.
+        $offsets = [];
+        for ($i = 0; $i < $count; ++$i) {
+            $offsets[] = $seconds > 0 ? random_int(0, $seconds) : 0;
+        }
+        rsort($offsets);
+
+        $now = new \DateTimeImmutable();
+        foreach ($offsets as $offset) {
+            $this->emitLog($now->modify(\sprintf('-%d seconds', $offset)));
         }
 
-        $this->addFlash('success', 'Logs emitted!');
+        $this->addFlash('success', \sprintf('%d logs generated, spread over %s!', $count, self::TEMPOS[$tempo]));
 
         return $this->redirectToRoute('homepage');
     }
@@ -59,7 +96,7 @@ class HomepageController extends AbstractController
         return $this->redirectToRoute('homepage');
     }
 
-    private function emitLog(): void
+    private function emitLog(\DateTimeImmutable $at): void
     {
         $level = match (random_int(1, 8)) {
             1 => LogLevel::DEBUG,
@@ -72,6 +109,8 @@ class HomepageController extends AbstractController
             8 => LogLevel::EMERGENCY,
         };
 
-        $this->logger->log($level, sprintf('A random string at level %s - %s.', $level, bin2hex(random_bytes(15))));
+        $this->logger->log($level, \sprintf('A random string at level %s - %s.', $level, bin2hex(random_bytes(15))), [
+            'backdate_to' => $at,
+        ]);
     }
 }

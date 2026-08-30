@@ -2,6 +2,7 @@
 
 use Castor\Attribute\AsTask;
 
+use function Castor\guard_min_version;
 use function Castor\import;
 use function Castor\io;
 use function Castor\notify;
@@ -11,29 +12,36 @@ use function docker\docker_compose_exec;
 use function docker\docker_compose_run;
 use function docker\generate_certificates;
 use function docker\up;
+use function provision\provision;
+
+guard_min_version('1.5.0');
 
 import(__DIR__ . '/.castor');
 
 /**
- * @return array<string, string>
+ * @return array{project_name: string, root_domain: string, extra_domains: string[], php_version: string}
  */
 function create_default_variables(): array
 {
     return [
         'project_name' => 'observability',
         'root_domain' => 'observability.test',
+        'extra_domains' => [],
+        'php_version' => '8.5',
     ];
 }
 
-#[AsTask(description: 'Builds and starts the infrastructure, then install the application (composer, yarn, ...)')]
+#[AsTask(description: 'Builds and starts the infrastructure, then install the application (composer, ...)')]
 function start(): void
 {
+    io()->title('Starting the stack');
+
     generate_certificates(force: false);
     build();
     up();
-    cache_clear();
     install();
     migrate();
+    provision();
 
     notify('The stack is now up and running.');
     io()->success('The stack is now up and running.');
@@ -41,26 +49,33 @@ function start(): void
     about();
 }
 
-#[AsTask(description: 'Installs the application (composer, yarn, ...)', namespace: 'app', aliases: ['install'])]
+#[AsTask(description: 'Installs the application (composer, ...)', namespace: 'app', aliases: ['install'])]
 function install(): void
 {
-    docker_compose_run('composer install -n --prefer-dist --optimize-autoloader');
+    io()->title('Installing the application');
+
+    docker_compose_run(['composer', 'install', '-n', '--prefer-dist', '--optimize-autoloader']);
 
     qa\install();
 }
 
-#[AsTask(description: 'Clear the application cache', namespace: 'app', aliases: ['cache-clear'])]
+#[AsTask(description: 'Clears the application cache', namespace: 'app', aliases: ['cache-clear'])]
 function cache_clear(): void
 {
-    docker_compose_run('rm -rf var/cache/ && bin/console cache:warmup');
+    io()->title('Clearing the application cache');
+
+    docker_compose_run(['rm', '-rf', 'var/cache/']);
+    docker_compose_run(['bin/console', 'cache:warmup']);
 }
 
 #[AsTask(description: 'Migrates database schema', namespace: 'app:db', aliases: ['migrate'])]
 function migrate(): void
 {
-    docker_compose_run('bin/console doctrine:database:create --if-not-exists');
-    docker_compose_run('bin/console doctrine:migration:migrate -n --allow-no-migration');
-    docker_compose_exec('bin/docker-entrypoint create_db', service: 'redash');
-    docker_compose_exec('clickhouse-client -q "CREATE DATABASE IF NOT EXISTS app"', service: 'clickhouse');
-    docker_compose_exec('clickhouse-client -q "CREATE TABLE IF NOT EXISTS  app.logs (message String) ENGINE = MergeTree() ORDER BY tuple()"', service: 'clickhouse');
+    io()->title('Migrating the database schema');
+
+    docker_compose_run(['bin/console', 'doctrine:database:create', '--if-not-exists']);
+    docker_compose_run(['bin/console', 'doctrine:migration:migrate', '-n', '--allow-no-migration']);
+    docker_compose_exec(['bin/docker-entrypoint', 'create_db'], service: 'redash');
+    docker_compose_exec(['clickhouse-client', '-q', 'CREATE DATABASE IF NOT EXISTS app'], service: 'clickhouse');
+    docker_compose_exec(['clickhouse-client', '-q', 'CREATE TABLE IF NOT EXISTS app.logs (datetime DateTime64(6), level UInt16, level_name LowCardinality(String), channel LowCardinality(String), message String) ENGINE = MergeTree() ORDER BY datetime'], service: 'clickhouse');
 }
