@@ -31,7 +31,7 @@ jobs:
                   persist-credentials: false
 
             - name: Check infrastructure/docker/services/php/Dockerfile
-              uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
+              uses: hadolint/hadolint-action@2a66e89f53d0771bb131a7fa31f3136336094aa6 # v3.4.0
               with:
                   dockerfile: infrastructure/docker/services/php/Dockerfile
 
@@ -40,7 +40,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: setup-castor
-              uses: castor-php/setup-castor@827c7ae1be0bb45e42a6082cad943a2afe0ffd40 # v1.0.0
+              uses: castor-php/setup-castor@2a495b8c91f00be6768ad8a040ba8634c797d386 # v1.1.0
 
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
