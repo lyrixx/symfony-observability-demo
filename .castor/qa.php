@@ -66,6 +66,14 @@ function phpstan(
         install();
     }
 
+    // phpstan-symfony reads this container dump (for service-type inference)
+    // regardless of the active context/APP_ENV -- under --context=ci or
+    // --context=test it's never generated otherwise, since those only warm
+    // the "test" cache.
+    if (!is_file(variable('root_dir') . '/var/cache/dev/App_KernelDevDebugContainer.xml')) {
+        docker_compose_run(['bin/console', 'cache:warmup', '--env=dev']);
+    }
+
     io()->section('Running PHPStan...');
 
     $command = ['phpstan', 'analyse', '--memory-limit=-1', '-v'];
