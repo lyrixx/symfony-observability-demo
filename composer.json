@@ -9,7 +9,7 @@
         "ext-uuid": "*",
         "doctrine/dbal": "^4.3",
         "doctrine/doctrine-bundle": "^3.3",
-        "doctrine/doctrine-migrations-bundle": "^3.3",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.0.1",
         "symfony/asset-mapper": "8.1.*",
         "symfony/console": "8.1.*",
