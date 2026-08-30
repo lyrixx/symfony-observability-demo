@@ -17,6 +17,7 @@
         "symfony/dotenv": "8.1.*",
         "symfony/flex": "^2.4.4",
         "symfony/framework-bundle": "8.1.*",
+        "symfony/http-client": "8.1.*",
         "symfony/messenger": "8.1.*",
         "symfony/monolog-bundle": "^4.0",
         "symfony/runtime": "8.1.*",

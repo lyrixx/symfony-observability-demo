@@ -55,10 +55,15 @@ migrating once (after a fresh checkout, or after a new migration is added):
 - Observability stack: Vector collects every log record and fans it out to
   Elasticsearch (+ Kibana), Loki (+ Grafana) and ClickHouse (+ Redash)
 - Each of Kibana/Grafana/Redash has a pre-provisioned "Observability overview"
-  dashboard (`.castor/provision.php`, `castor app:provision`, idempotent).
-  Grafana and Kibana need no login; Redash: `admin@observability.test` /
-  `observability`. The homepage's "Explore" links point straight at these
-  dashboards, not at the tools' bare root.
+  dashboard: Grafana is file-based provisioning
+  (`infrastructure/docker/services/grafana/`), Kibana and Redash are
+  provisioned via `bin/console app:provision-dashboards`
+  (`src/Command/ProvisionDashboardsCommand.php`, idempotent), run inside the
+  `builder` container by `castor app:provision` so it can reach them by
+  their plain Docker hostname (no `/etc/hosts`, no router, no TLS — needed
+  for this to work in CI). Grafana and Kibana need no login; Redash:
+  `admin@observability.test` / `observability`. The homepage's "Explore"
+  links point straight at these dashboards, not at the tools' bare root.
 
 ## Frontend
 
