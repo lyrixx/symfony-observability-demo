@@ -2328,7 +2328,7 @@
         },
         {
             "name": "symfony/doctrine-messenger",
-            "version": "v8.1.4",
+            "version": "v8.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/doctrine-messenger.git",
@@ -2382,7 +2382,7 @@
             "description": "Symfony Doctrine Messenger Bridge",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/doctrine-messenger/tree/v8.1.4"
+                "source": "https://github.com/symfony/doctrine-messenger/tree/v8.1.6"
             },
             "funding": [
                 {
@@ -3453,16 +3453,16 @@
         },
         {
             "name": "symfony/messenger",
-            "version": "v8.1.5",
+            "version": "v8.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/messenger.git",
-                "reference": "fa890d0632db0b5e8bc547560b412de824b3b9cd"
+                "reference": "fbd6c30c6b71ca95713aa3592f5112d39f9c073d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/messenger/zipball/fa890d0632db0b5e8bc547560b412de824b3b9cd",
-                "reference": "fa890d0632db0b5e8bc547560b412de824b3b9cd",
+                "url": "https://api.github.com/repos/symfony/messenger/zipball/fbd6c30c6b71ca95713aa3592f5112d39f9c073d",
+                "reference": "fbd6c30c6b71ca95713aa3592f5112d39f9c073d",
                 "shasum": ""
             },
             "require": {
@@ -3521,7 +3521,7 @@
             "description": "Helps applications send and receive messages to/from other applications or via message queues",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/messenger/tree/v8.1.5"
+                "source": "https://github.com/symfony/messenger/tree/v8.1.6"
             },
             "funding": [
                 {
@@ -3541,7 +3541,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-21T20:43:01+00:00"
+            "time": "2026-08-30T01:03:44+00:00"
         },
         {
             "name": "symfony/monolog-bridge",
@@ -4365,16 +4365,16 @@
         },
         {
             "name": "symfony/service-contracts",
-            "version": "v3.7.1",
+            "version": "v3.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "c0a284bab1ed8aa0417e3d69250ab437739563a0"
+                "reference": "15e6a07ec2a2c75ceb1b21dd98105ee8456d2257"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/c0a284bab1ed8aa0417e3d69250ab437739563a0",
-                "reference": "c0a284bab1ed8aa0417e3d69250ab437739563a0",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/15e6a07ec2a2c75ceb1b21dd98105ee8456d2257",
+                "reference": "15e6a07ec2a2c75ceb1b21dd98105ee8456d2257",
                 "shasum": ""
             },
             "require": {
@@ -4428,7 +4428,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/service-contracts/tree/v3.7.1"
+                "source": "https://github.com/symfony/service-contracts/tree/v3.7.3"
             },
             "funding": [
                 {
@@ -4448,7 +4448,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-16T09:55:08+00:00"
+            "time": "2026-07-27T15:39:01+00:00"
         },
         {
             "name": "symfony/stopwatch",
