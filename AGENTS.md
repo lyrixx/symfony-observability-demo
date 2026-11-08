@@ -24,6 +24,7 @@ castor app:db:migrate                        # Doctrine migrations (alias: casto
 castor app:provision                         # (re)provisions the Kibana/Grafana/Redash dashboards
 castor pg -- select 1                        # one-off query against PostgreSQL (alias: castor postgres)
 castor about                                 # list every URL exposed by the stack
+castor media                                 # regenerate the README screenshots (needs Node.js on the host)
 ```
 
 Docker:
@@ -64,6 +65,8 @@ migrating once (after a fresh checkout, or after a new migration is added):
   for this to work in CI). Grafana and Kibana need no login; Redash:
   `admin@observability.test` / `observability`. The homepage's "Explore"
   links point straight at these dashboards, not at the tools' bare root.
+  The homepage also embeds two panels of the Grafana dashboard in iframes,
+  by panel id (`GF_SECURITY_ALLOW_EMBEDDING`).
 
 ## Frontend
 

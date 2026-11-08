@@ -5,8 +5,12 @@ parameters:
         - tests
         - castor.php
         - .castor/
+    excludePaths:
+        - .castor/vendor/*
     scanFiles:
         - .castor.stub.php
+    bootstrapFiles:
+        - .castor/vendor/autoload.php
     tmpDir: tools/phpstan/var
     inferPrivatePropertyTypeFromConstructor: true
 

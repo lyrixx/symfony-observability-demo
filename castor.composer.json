@@ -1,0 +1,8 @@
+{
+    "name": "symfony-observability-demo/castor",
+    "description": "Castor commands for project symfony-observability-demo",
+    "type": "castor-project",
+    "require": {
+        "playwright-php/playwright": "^1.6"
+    }
+}

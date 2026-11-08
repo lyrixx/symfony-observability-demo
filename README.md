@@ -80,6 +80,10 @@ working in this repo, see [AGENTS.md](AGENTS.md).
 
 ## Screenshots
 
+### Log generator
+
+![Log generator](media/logs.png)
+
 ### Kibana
 
 ![Kibana](media/kibana.png)
@@ -91,3 +95,10 @@ working in this repo, see [AGENTS.md](AGENTS.md).
 ### Redash
 
 ![Redash](media/redash.png)
+
+### Regenerating the screenshots
+
+With the stack running, `castor media` regenerates `media/homepage.png` and
+`media/logs.png`. It drives a headless Chromium through
+[Playwright PHP](https://playwright-php.dev/), so it needs Node.js on the host
+(only for this task), and downloads the browser on its first run.
