@@ -1,66 +1,122 @@
 {% extends 'base.html.twig' %}
 
+{% import '_ui.html.twig' as ui %}
+
+{% macro node_shape(x, y, name, caption) %}
+    <rect x="{{ x - 60 }}" y="{{ y - 26 }}" width="120" height="52" rx="6" />
+    <text class="obs-node-name" x="{{ x }}" y="{{ y - 2 }}">{{ name }}</text>
+    <text class="obs-node-caption" x="{{ x }}" y="{{ y + 15 }}">{{ caption }}</text>
+{% endmacro %}
+
 {% block title %}Observability Demo Application{% endblock %}
 
-{% block body %}
-    <div class="bg-body-tertiary border-bottom">
-        <div class="container py-5 text-center">
-            <h1 class="display-5 fw-bold">{{ block('title') }}</h1>
-            <p class="col-lg-8 mx-auto lead">
-                This application demonstrates how to configure Monolog with Symfony.
-                Every log record is sent to
-                <a href="https://vector.dev/" title="An application that collects and re-dispatches logs">Vector</a>,
-                which fans it out to ClickHouse, Elasticsearch and Loki.
-            </p>
-            <div class="d-flex justify-content-center gap-2">
-                <a href="{{ path('logs') }}" class="btn btn-primary btn-lg">Generate logs</a>
-                <a href="{{ path('exception') }}" class="btn btn-outline-danger btn-lg">Generate an exception</a>
-            </div>
-        </div>
-    </div>
+{% block breadcrumb %}Overview{% endblock %}
 
-    <div class="container py-5">
-        <h2 class="h4 mb-4">Explore the collected logs</h2>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title h5">Kibana</h3>
-                        <p class="card-text text-body-secondary">Pre-built dashboard over Elasticsearch logs.</p>
-                        <a href="https://kibana.{{ app.request.host }}/app/dashboards#/view/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
+{% block body %}
+    <section class="obs-hero">
+        <div class="row g-2">
+            <div class="col-xl-5">
+                <div class="obs-panel obs-hero-intro">
+                    <p class="obs-kicker">symfony/monolog · live demo</p>
+                    <h1>{{ block('title') }}</h1>
+                    <p class="obs-lead">
+                        This application demonstrates how to configure Monolog with Symfony.
+                        Every log record is sent to
+                        <a href="https://vector.dev/" title="An application that collects and re-dispatches logs">Vector</a>,
+                        which fans it out to ClickHouse, Elasticsearch and Loki.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ path('logs') }}" class="btn btn-primary">Generate logs</a>
+                        <a href="{{ path('exception') }}" class="btn btn-outline-danger">Generate an exception</a>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title h5">Grafana</h3>
-                        <p class="card-text text-body-secondary">Pre-built dashboard over Loki and ClickHouse logs.</p>
-                        <a href="https://grafana.{{ app.request.host }}/d/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title h5">Redash</h3>
-                        <p class="card-text text-body-secondary">
-                            Pre-built dashboard over ClickHouse logs. Login:
-                            <code>admin@observability.test</code> / <code>observability</code>.
-                        </p>
-                        <a href="https://redash.{{ app.request.host }}/dashboard/observability-overview" class="mt-auto">Open dashboard &raquo;</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title h5">Vector</h3>
-                        <p class="card-text text-body-secondary">Inspect the log collection pipeline itself.</p>
-                        <a href="https://vector.{{ app.request.host }}/playground" class="mt-auto">Open playground &raquo;</a>
-                    </div>
-                </div>
+            <div class="col-xl-7">
+                <figure class="obs-panel obs-pipeline">
+                    <figcaption class="visually-hidden">
+                        Log records go from Symfony to Vector, which sends them to Elasticsearch, Loki and ClickHouse.
+                        Kibana reads Elasticsearch, Grafana reads Loki and ClickHouse, Redash reads ClickHouse.
+                    </figcaption>
+                    <svg viewBox="0 0 760 340">
+                        {% set route_to_kibana = 'M130,170 H330 C380,170 370,60 420,60 H620' %}
+                        {% set route_to_grafana = 'M130,170 H620' %}
+                        {% set route_to_redash = 'M130,170 H330 C380,170 370,280 420,280 H620' %}
+                        {% set route_from_clickhouse_to_grafana = 'M130,170 H330 C380,170 370,280 420,280 H540 C585,280 575,180 620,180' %}
+                        {% set routes = [route_to_kibana, route_to_grafana, route_to_redash, route_from_clickhouse_to_grafana] %}
+
+                        <g class="obs-edges">
+                            <path d="M130,170 H210" />
+                            <path d="M330,170 C380,170 370,60 420,60" />
+                            <path d="M330,170 H420" />
+                            <path d="M330,170 C380,170 370,280 420,280" />
+                            <path d="M540,60 H620" />
+                            <path d="M540,170 H620" />
+                            <path d="M540,280 H620" />
+                            <path d="M540,280 C585,280 575,180 620,180" />
+                        </g>
+
+                        {% for level in ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'] %}
+                            <circle class="obs-token obs-level-{{ level }}" r="5">
+                                <animateMotion dur="5s" begin="-{{ loop.index0 * 0.625 }}s" repeatCount="indefinite" path="{{ routes[loop.index0 % 4] }}" />
+                            </circle>
+                        {% endfor %}
+
+                        <g class="obs-node">{{ _self.node_shape(70, 170, 'Symfony', 'monolog') }}</g>
+                        <a class="obs-node" href="{{ ui.tool_url('vector') }}">{{ _self.node_shape(270, 170, 'Vector', 'fan-out') }}</a>
+                        <g class="obs-node">{{ _self.node_shape(480, 60, 'Elasticsearch', 'store') }}</g>
+                        <g class="obs-node">{{ _self.node_shape(480, 170, 'Loki', 'store') }}</g>
+                        <g class="obs-node">{{ _self.node_shape(480, 280, 'ClickHouse', 'store') }}</g>
+                        <a class="obs-node" href="{{ ui.tool_url('kibana') }}">{{ _self.node_shape(680, 60, 'Kibana', 'dashboard') }}</a>
+                        <a class="obs-node" href="{{ ui.tool_url('grafana') }}">{{ _self.node_shape(680, 175, 'Grafana', 'dashboard') }}</a>
+                        <a class="obs-node" href="{{ ui.tool_url('redash') }}">{{ _self.node_shape(680, 280, 'Redash', 'dashboard') }}</a>
+                    </svg>
+                </figure>
             </div>
         </div>
-    </div>
+    </section>
+
+    <details class="obs-row" open>
+        <summary>
+            <h2>Live logs</h2>
+            <span class="obs-row-meta">Grafana · last 6 hours · refreshed every 10 s</span>
+        </summary>
+        <div class="row g-2">
+            <div class="col-xl-7">
+                <iframe class="obs-frame" src="{{ ui.grafana_panel_url(2) }}" title="Log volume by level, from Grafana" loading="lazy"></iframe>
+            </div>
+            <div class="col-xl-5">
+                <iframe class="obs-frame" src="{{ ui.grafana_panel_url(4) }}" title="Recent logs, from Grafana" loading="lazy"></iframe>
+            </div>
+        </div>
+    </details>
+
+    <details class="obs-row" open>
+        <summary>
+            <h2>Explore the collected logs</h2>
+        </summary>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-xxl-4 g-2">
+            {% for tool in [
+                {id: 'kibana', name: 'Kibana', source: 'Elasticsearch', action: 'Open dashboard', description: 'Pre-built dashboard over Elasticsearch logs.'},
+                {id: 'grafana', name: 'Grafana', source: 'Loki + ClickHouse', action: 'Open dashboard', description: 'Pre-built dashboard over Loki and ClickHouse logs.'},
+                {id: 'redash', name: 'Redash', source: 'ClickHouse', action: 'Open dashboard', description: 'Pre-built dashboard over ClickHouse logs.', credentials: true},
+                {id: 'vector', name: 'Vector', source: 'Pipeline', action: 'Open playground', description: 'Inspect the log collection pipeline itself.'},
+            ] %}
+                <div class="col">
+                    <article class="obs-panel obs-tool">
+                        <header class="obs-panel-header">
+                            <h3>{{ tool.name }}</h3>
+                            <span class="obs-chip">{{ tool.source }}</span>
+                        </header>
+                        <div class="obs-panel-body">
+                            <p>{{ tool.description }}</p>
+                            {% if tool.credentials ?? false %}
+                                <p>Login: <code>admin@observability.test</code> / <code>observability</code></p>
+                            {% endif %}
+                            <a class="obs-tool-link" href="{{ ui.tool_url(tool.id) }}">{{ tool.action }}{{ ui.icon('arrow') }}</a>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+    </details>
 {% endblock %}

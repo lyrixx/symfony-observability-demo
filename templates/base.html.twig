@@ -1,10 +1,11 @@
+{% import '_ui.html.twig' as ui %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><path d=%22M8 16h16M8 16C16 16 15 6 24 6M8 16C16 16 15 26 24 26%22 fill=%22none%22 stroke=%22%23ff8833%22 stroke-width=%222.6%22 stroke-linecap=%22round%22/><g fill=%22%23ff8833%22><circle cx=%226%22 cy=%2216%22 r=%223.6%22/><circle cx=%2226%22 cy=%226%22 r=%223%22/><circle cx=%2226%22 cy=%2216%22 r=%223%22/><circle cx=%2226%22 cy=%2226%22 r=%223%22/></g></svg>">
         {% block stylesheets %}
         {% endblock %}
 
@@ -19,70 +20,85 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="{{ path('homepage') }}">⚫️ Observability Demo</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('logs') }}">Generate logs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('exception') }}">Generate exception</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Explore
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="https://kibana.{{ app.request.host }}/app/dashboards#/view/observability-overview">Kibana</a></li>
-                                <li><a class="dropdown-item" href="https://grafana.{{ app.request.host }}/d/observability-overview">Grafana</a></li>
-                                <li><a class="dropdown-item" href="https://redash.{{ app.request.host }}/dashboard/observability-overview">Redash</a></li>
-                                <li><a class="dropdown-item" href="https://vector.{{ app.request.host }}/playground">Vector</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav ms-md-3 border-top border-md-top-0 border-secondary mt-2 mt-md-0 pt-2 pt-md-0 ps-md-3 border-start-md">
-                        <li class="nav-item">
-                            <a class="nav-link fw-semibold" href="https://github.com/lyrixx/symfony-observability-demo" target="_blank" rel="noopener">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-                                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                                </svg>
-                                GitHub
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link fw-semibold" href="https://s.lyrixx.info/log" target="_blank" rel="noopener">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-                                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5zM4 14.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5"/>
-                                </svg>
-                                Slides
-                            </a>
-                        </li>
-                    </ul>
+    <body>
+        <header class="obs-topbar">
+            <button class="obs-topbar-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#obs-menu" aria-controls="obs-menu" aria-label="Toggle navigation">
+                {{ ui.icon('menu') }}
+            </button>
+            <a class="obs-brand" href="{{ path('homepage') }}">
+                <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="obs-logo" x1="0" y1="1" x2="1" y2="0">
+                            <stop stop-color="#f55f3e" />
+                            <stop offset="1" stop-color="#f9c22b" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M8 16h16M8 16C16 16 15 6 24 6M8 16C16 16 15 26 24 26" fill="none" stroke="url(#obs-logo)" stroke-width="2.6" stroke-linecap="round" />
+                    <g fill="url(#obs-logo)">
+                        <circle cx="6" cy="16" r="3.6" />
+                        <circle cx="26" cy="6" r="3" />
+                        <circle cx="26" cy="16" r="3" />
+                        <circle cx="26" cy="26" r="3" />
+                    </g>
+                </svg>
+                <span>Observability Demo</span>
+            </a>
+            <nav class="obs-breadcrumb d-none d-md-block" aria-label="Breadcrumb">
+                <a href="{{ path('homepage') }}">Home</a>
+                <span aria-current="page">{% block breadcrumb %}{{ block('title') }}{% endblock %}</span>
+            </nav>
+            <div class="obs-topbar-links">
+                <a href="https://github.com/lyrixx/symfony-observability-demo" target="_blank" rel="noopener">{{ ui.icon('github') }}<span class="d-none d-sm-inline">GitHub</span></a>
+                <a href="https://s.lyrixx.info/log" target="_blank" rel="noopener">{{ ui.icon('slides') }}<span class="d-none d-sm-inline">Slides</span></a>
+            </div>
+        </header>
+
+        <div class="obs-toasts" role="status" aria-live="polite">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <div class="obs-shell">
+            <div class="obs-sidebar">
+                <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="obs-menu" aria-label="Navigation">
+                    <div class="offcanvas-header d-lg-none">
+                        <span class="obs-nav-title m-0">Menu</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#obs-menu" aria-label="Close"></button>
+                    </div>
+                    <nav class="offcanvas-body d-block" aria-label="Main">
+                        <ul class="obs-nav">
+                            <li><a class="obs-nav-link {{ app.current_route == 'homepage' ? 'active' }}" href="{{ path('homepage') }}">{{ ui.icon('overview') }}Overview</a></li>
+                            <li><a class="obs-nav-link {{ app.current_route == 'logs' ? 'active' }}" href="{{ path('logs') }}">{{ ui.icon('logs') }}Generate logs</a></li>
+                            <li><a class="obs-nav-link" href="{{ path('exception') }}">{{ ui.icon('exception') }}Generate exception</a></li>
+                        </ul>
+
+                        <p class="obs-nav-title">Explore</p>
+                        <ul class="obs-nav">
+                            <li><a class="obs-nav-link" href="{{ ui.tool_url('kibana') }}">{{ ui.icon('dashboard') }}Kibana</a></li>
+                            <li><a class="obs-nav-link" href="{{ ui.tool_url('grafana') }}">{{ ui.icon('dashboard') }}Grafana</a></li>
+                            <li><a class="obs-nav-link" href="{{ ui.tool_url('redash') }}">{{ ui.icon('dashboard') }}Redash</a></li>
+                            <li><a class="obs-nav-link" href="{{ ui.tool_url('vector') }}">{{ ui.icon('pipeline') }}Vector</a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
-        </nav>
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} rounded-0 mb-0 text-center" role="alert">{{ message }}</div>
-            {% endfor %}
-        {% endfor %}
+            <div class="obs-content">
+                <main class="obs-main">
+                    {% block body %}{% endblock %}
+                </main>
 
-        <main class="flex-grow-1">
-            {% block body %}{% endblock %}
-        </main>
-
-        <footer class="bg-dark text-light-emphasis text-center py-3 mt-auto">
-            <div class="container small">
-                Built to demonstrate how to configure Monolog with Symfony &mdash;
-                <a class="link-light" href="https://s.lyrixx.info/log">slides (in French)</a>
+                <footer class="obs-footer">
+                    Built to demonstrate how to configure Monolog with Symfony &mdash;
+                    <a href="https://s.lyrixx.info/log">slides (in French)</a>
+                </footer>
             </div>
-        </footer>
+        </div>
     </body>
 </html>

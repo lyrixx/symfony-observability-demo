@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Dto\User;
+use App\Enum\LogTempo;
 use App\Message\MyMessage;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
@@ -11,22 +12,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\EnumRequirement;
 
 #[WithMonologChannel('homepage')]
 class HomepageController extends AbstractController
 {
-    /**
-     * Tempos offered on the log generator page, with their human label.
-     *
-     * @var array<string, string>
-     */
-    private const TEMPOS = [
-        'now' => 'right now',
-        '30m' => 'the last 30 minutes',
-        '1h' => 'the last hour',
-        '6h' => 'the last 6 hours',
-    ];
-
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly MessageBusInterface $bus,
@@ -51,20 +41,15 @@ class HomepageController extends AbstractController
     public function logs(): Response
     {
         return $this->render('homepage/logs.html.twig', [
-            'tempos' => self::TEMPOS,
+            'tempos' => LogTempo::cases(),
         ]);
     }
 
-    #[Route('/logs/generate/{tempo}', name: 'generate_logs', requirements: ['tempo' => 'now|30m|1h|6h'])]
-    public function generateLogs(string $tempo): Response
+    #[Route('/logs/generate/{tempo}', name: 'generate_logs', requirements: ['tempo' => new EnumRequirement(LogTempo::class)])]
+    public function generateLogs(LogTempo $tempo): Response
     {
-        [$seconds, $count] = match ($tempo) {
-            'now' => [0, random_int(1, 100)],
-            '30m' => [1_800, 150],
-            '1h' => [3_600, 250],
-            '6h' => [21_600, 600],
-            default => throw new \UnexpectedValueException("Unknown tempo \"{$tempo}\"."),
-        };
+        $seconds = $tempo->windowInSeconds();
+        $count = random_int($tempo->minLogCount(), $tempo->maxLogCount());
 
         // Emit oldest-first: Loki (and log stores in general) rejects or
         // mishandles out-of-order entries within the same stream.
@@ -79,7 +64,7 @@ class HomepageController extends AbstractController
             $this->emitLog($now->modify(\sprintf('-%d seconds', $offset)));
         }
 
-        $this->addFlash('success', \sprintf('%d logs generated, spread over %s!', $count, self::TEMPOS[$tempo]));
+        $this->addFlash('success', \sprintf('%d logs generated, spread over %s!', $count, $tempo->label()));
 
         return $this->redirectToRoute('homepage');
     }

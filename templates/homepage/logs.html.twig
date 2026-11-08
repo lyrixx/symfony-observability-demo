@@ -1,29 +1,47 @@
 {% extends 'base.html.twig' %}
 
+{% import '_ui.html.twig' as ui %}
+
 {% block title %}Generate logs{% endblock %}
 
 {% block body %}
-    <div class="container py-5">
-        <h1 class="mb-3">{{ block('title') }}</h1>
-        <p class="lead text-body-secondary">
+    <header class="obs-page-header">
+        <p class="obs-kicker">log generator</p>
+        <h1>{{ block('title') }}</h1>
+        <p class="obs-lead">
             Pick a tempo below. Logs are generated with realistic, backdated
             timestamps spread across the chosen window, so the dashboards
             immediately show a believable history instead of a single burst.
         </p>
+    </header>
 
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mt-2">
-            {% for tempo, label in tempos %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm text-center">
-                        <div class="card-body d-flex flex-column">
-                            <h2 class="card-title h5 text-capitalize">{{ label }}</h2>
-                            <a href="{{ path('generate_logs', {tempo: tempo}) }}" class="btn btn-primary mt-auto">
-                                Generate logs
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-2">
+        {% for tempo in tempos %}
+            <div class="col">
+                <a class="obs-panel obs-stat obs-stat-{{ loop.index }}" href="{{ path('generate_logs', {tempo: tempo.value}) }}">
+                    <span class="obs-stat-title">{{ tempo.label|capitalize }}</span>
+                    <span class="obs-stat-value">
+                        {{- tempo.minLogCount == tempo.maxLogCount ? tempo.minLogCount : tempo.minLogCount ~ '–' ~ tempo.maxLogCount -}}
+                        <small>logs</small>
+                    </span>
+                    <span class="obs-stat-action">Generate logs{{ ui.icon('arrow') }}</span>
+                </a>
+            </div>
+        {% endfor %}
     </div>
+
+    <details class="obs-row" open>
+        <summary>
+            <h2>Log levels</h2>
+        </summary>
+        <div class="obs-panel obs-panel-body">
+            <p>Each generated record gets one of the eight PSR-3 levels, picked at random.</p>
+            <ul class="obs-legend">
+                {% for level in ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'] %}
+                    <li class="obs-level-{{ level }}"><span>{{ level|upper }}</span></li>
+                {% endfor %}
+            </ul>
+            <a class="obs-tool-link" href="{{ ui.tool_url('grafana') }}">See them in Grafana{{ ui.icon('arrow') }}</a>
+        </div>
+    </details>
 {% endblock %}

@@ -27,4 +27,6 @@ return [
     'bootstrap' => ['version' => '5.3.8'],
     '@popperjs/core' => ['version' => '2.11.8'],
     'bootstrap/dist/css/bootstrap.min.css' => ['version' => '5.3.8', 'type' => 'css'],
+    '@fontsource-variable/inter/index.css' => ['version' => '5.3.0', 'type' => 'css'],
+    '@fontsource-variable/roboto-mono/index.css' => ['version' => '5.3.0', 'type' => 'css'],
 ];

@@ -175,6 +175,8 @@ services:
             - GF_AUTH_ANONYMOUS_ENABLED=true
             - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
             - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
+            # The homepage embeds some panels of the dashboard in iframes
+            - GF_SECURITY_ALLOW_EMBEDDING=true
         profiles:
             - default
         labels:
