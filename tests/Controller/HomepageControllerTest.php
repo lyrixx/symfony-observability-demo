@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class HomepageControllerTest extends WebTestCase
@@ -24,9 +25,7 @@ class HomepageControllerTest extends WebTestCase
         self::assertSelectorExists('a[href$="/logs/generate/6h"]');
     }
 
-    /**
-     * @dataProvider provideGenerateLogsRedirectsToHomepageCases
-     */
+    #[DataProvider('provideGenerateLogsRedirectsToHomepageCases')]
     public function testGenerateLogsRedirectsToHomepage(string $tempo): void
     {
         $client = static::createClient();
@@ -44,6 +43,14 @@ class HomepageControllerTest extends WebTestCase
         yield '30 minutes' => ['30m'];
         yield '1 hour' => ['1h'];
         yield '6 hours' => ['6h'];
+    }
+
+    public function testGenerateLogsRejectsAnUnknownTempo(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/logs/generate/2d');
+
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testExceptionRedirectsToHomepage(): void
